@@ -1,0 +1,17 @@
+{
+  "name": "riotkit",
+  "description": "An addon for Riot",
+  "main": [
+    "riotkit.js"
+  ],
+  "moduleType": [
+    "globals"
+  ],
+  "dependencies": [
+    "tAMD"
+  ],
+  "ignore": [
+    "**/.*",
+    "test"
+  ]
+}
