@@ -7,9 +7,9 @@
   "moduleType": [
     "globals"
   ],
-  "dependencies": [
-    "tAMD"
-  ],
+  "dependencies": {
+    "tAMD": "^1.0"
+  },
   "ignore": [
     "**/.*",
     "test"
