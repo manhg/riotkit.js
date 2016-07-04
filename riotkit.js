@@ -1,14 +1,20 @@
 (function() {
   "use strict";
   var parseJSON = function(response) {
-    return response.json()
+    if (response.status >= 200 && response.status < 300) {
+      return response.json();
+    } else {
+      var error = new Error(response.statusText);
+      error.response = response;
+      throw error;
+    }
   };
   var reportException = function(ex) {
     console.log(ex);
   };
   var debug = function(message) {
     console.debug(message)
-  }
+  };
 
   define('tag', function() {
     return {
