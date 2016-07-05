@@ -47,18 +47,34 @@
         .then(callback)
         .catch(reportException);
     }
-    this.formValues = function(formEl, keys) {
-      var ret = {},
-        el = null;
-      for (var i = 0; i < keys.length; i++) {
-        el = formEl.querySelector('[name="' + keys[i] + '"]');
-        if (el) {
-          ret[keys[i]] = el.value;
-        } else {
-          console.debug('Missing form element: ' + keys[i]);
+    this.serialize = function(form) {
+      var ret = {}, item = null;
+      for (var i = 0; i < form.elements.length; i++) {
+        item = form.elements[i];
+        if (item.nodeName == 'INPUT') {
+          switch (item.type) {
+            case 'checkbox':
+            case 'radio':
+              if (item.checked) {
+                ret[item.name] = item.value;
+              }
+              break;
+            case 'text':
+            case 'hidden':
+            case 'password':
+            case 'submit':
+              ret[item.name] = item.value;
+              break;
+            case 'file':
+              break;
+          }
+        } else if (item.nodeName == 'TEXTAREA') {
+          ret[item.name] = item.value;
+          // TODO case 'SELECT':
+          // https://github.com/riverside/form-serialize/blob/master/serialize.js#L34
         }
       }
-      el = null;
+      item = null;
       return ret;
     }
   };
