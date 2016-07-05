@@ -30,13 +30,13 @@
       // NOTICE fetch won't send cookie by defaults
     };
     this.fetchGET = function(url, callback) {
-      fetch(url, {method: 'GET', headers: this.extraHeaders})
+      return fetch(url, {method: 'GET', headers: this.extraHeaders})
         .then(parseJSON)
         .then(callback)
         .catch(reportException);
     }
     this.fetchPOST = function(url, objData, callback) {
-      fetch(url, {
+      return fetch(url, {
         method: 'POST',
         headers: _.defaults(this.extraHeaders, {
           'Accept': 'application/json',
