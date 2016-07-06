@@ -1,21 +1,10 @@
 (function() {
   "use strict";
-  var parseJSON = function(response) {
-    if (response.status >= 200 && response.status < 300) {
-      return response.json();
-    } else {
-      var error = new Error(response.statusText);
-      error.response = response;
-      throw error;
-    }
-  };
-  var reportException = function(ex) {
-    console.log(ex);
-  };
-  var debug = function(message) {
-    console.debug(message)
-  };
 
+  /**
+   * AMD load Riot tag file
+   * example: require('tag!/path/to/some.tag', function() { // tag loaded })
+   */
   define('tag', function() {
     return {
       load: function(resource, require, done) {
@@ -24,49 +13,77 @@
     }
   });
 
-  function BackendMixin() {
-    this.extraHeaders = {
-      // TODO auth token
-      // NOTICE fetch won't send cookie by defaults
+  function UtilsMixin() {
+    /** Parse JSON response and pass status to Promise chain */
+    var parse = function(response) {
+      return new Promise(function(accept, reject) {
+        response.json().then(function(json) {
+          if (response.status >= 200 && response.status < 300) {
+            accept(json, response.status)
+          } else {
+            reject(json, response.status)
+          }
+        });
+      });
     };
-    this.fetchGET = function(url, callback) {
-      return fetch(url, {method: 'GET', headers: this.extraHeaders})
-        .then(parseJSON)
-        .then(callback)
-        .catch(reportException);
-    }
-    this.fetchPOST = function(url, objData, callback) {
+    this.fetch = {};
+
+    /** Get JSON */
+    this.fetch.get = function(url) {
       return fetch(url, {
-        method: 'POST',
-        headers: _.defaults(this.extraHeaders, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+          'Accept': 'application/json'
+        }
+      }).then(parse)
+    };
+
+    /**
+     * Send JSON data
+     * @param {Object} data
+     */
+    this.fetch.send = function(url, data, method) {
+      return fetch(url, {
+        method: method || 'POST',
+        credentials: 'same-origin',
+        headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
-        }),
-        body: JSON.stringify(objData)
-      }).then(parseJSON)
-        .then(callback)
-        .catch(reportException);
-    }
-    this.serialize = function(form) {
+        },
+        body: JSON.stringify(data)
+      }).then(parse)
+    };
+
+    /**
+     * Post encoded form
+     * @param {Object} data
+     */
+    this.fetch.form = function(url, formNode) {
+      return fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: new FormData(formNode)
+      }).then(parse)
+    };
+
+    /**
+     * Given a form, return object contains all its data
+     * @param {HTMLFormElement} formNode
+     */
+    this.serialize = function(formNode) {
       var ret = {}, item = null;
-      for (var i = 0; i < form.elements.length; i++) {
-        item = form.elements[i];
+      for (var i = 0; i < formNode.elements.length; i++) {
+        item = formNode.elements[i];
         if (item.nodeName == 'INPUT') {
-          switch (item.type) {
-            case 'checkbox':
-            case 'radio':
-              if (item.checked) {
-                ret[item.name] = item.value;
-              }
-              break;
-            case 'text':
-            case 'hidden':
-            case 'password':
-            case 'submit':
+          if (item.type == 'checkbox' || item.type == 'radio') {
+            if (item.checked) {
               ret[item.name] = item.value;
-              break;
-            case 'file':
-              break;
+            }
+          }
+          else if (item.type == 'file') { }
+          else {
+            ret[item.name] = item.value;
           }
         } else if (item.nodeName == 'TEXTAREA') {
           ret[item.name] = item.value;
@@ -79,13 +96,5 @@
     }
   };
 
-  riot.mixin('backend', new BackendMixin());
-
-  document.onkeydown = function(e) {
-    // Press Escape to close modal
-    if (e.keyCode == 27) {
-      var mods = document.querySelectorAll('.modal > [type=checkbox]');
-      [].forEach.call(mods, function(mod){ mod.checked = false; });
-    }
-  };
+  riot.mixin('utils', new UtilsMixin());
 })();
