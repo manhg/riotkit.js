@@ -1,18 +1,6 @@
 (function() {
   "use strict";
 
-  /**
-   * AMD load Riot tag file
-   * example: require('tag!/path/to/some.tag', function() { // tag loaded })
-   */
-  define('tag', function() {
-    return {
-      load: function(resource, require, done) {
-        riot.compile(resource, done);
-      }
-    }
-  });
-
   function UtilsMixin() {
     /** Parse JSON response and pass status to Promise chain */
     var parse = function(response) {
