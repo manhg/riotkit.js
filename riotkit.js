@@ -85,6 +85,17 @@
           else {
             ret[item.name] = item.value;
           }
+        } else if (item.nodeName == 'SELECT') {
+          if (item.hasAttribute('multiple')) {
+            ret[item.name] = [];
+            for (var j = iten.options.length - 1; j >= 0; j--) {
+              if (item.options[j].selected) {
+                ret[item.name].push(item.options[j].value)
+              }
+            }
+          } else {
+            ret[item.name] = item.value;
+          }
         } else if (item.nodeName == 'TEXTAREA') {
           ret[item.name] = item.value;
           // TODO case 'SELECT':
